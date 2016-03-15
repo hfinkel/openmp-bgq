@@ -1864,8 +1864,17 @@ __kmp_init_nest_lock_with_hint(ident_t *loc, void **lock, kmp_dyna_lockseq_t seq
         case lockseq_drdpa:
             seq = lockseq_nested_drdpa;
             break;
+#if KMP_OS_CNK
+        case lockseq_bgq_sa:
+            seq = lockseq_nested_bgq_sa;
+            break;
+#endif
         default:
+#if KMP_OS_CNK
+            seq = lockseq_nested_bgq_sa;
+#else
             seq = lockseq_nested_queuing;
+#endif
     }
     KMP_INIT_I_LOCK(lock, seq);
 #if USE_ITT_BUILD
