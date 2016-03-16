@@ -1246,6 +1246,7 @@ typedef struct kmp_sys_info {
     long nivcsw;          /* the number of times a context switch was forced           */
 } kmp_sys_info_t;
 
+#if KMP_ARCH_X86 || KMP_ARCH_X86_64
 typedef struct kmp_cpuinfo {
     int        initialized;  // If 0, other fields are not initialized.
     int        signature;    // CPUID(1).EAX
@@ -1261,7 +1262,7 @@ typedef struct kmp_cpuinfo {
     kmp_uint64 frequency;    // Nominal CPU frequency in Hz.
     char       name [3*sizeof (kmp_cpuid_t)]; // CPUID(0x80000002,0x80000003,0x80000004)
 } kmp_cpuinfo_t;
-
+#endif
 
 #ifdef BUILD_TV
 
@@ -2684,7 +2685,9 @@ extern int      __kmp_storage_map;         /* True means print storage map for t
 extern int      __kmp_storage_map_verbose; /* True means storage map includes placement info */
 extern int      __kmp_storage_map_verbose_specified;
 
+#if KMP_ARCH_X86 || KMP_ARCH_X86_64
 extern kmp_cpuinfo_t    __kmp_cpuinfo;
+#endif
 
 extern volatile int __kmp_init_serial;
 extern volatile int __kmp_init_gtid;
