@@ -4313,6 +4313,17 @@ __kmp_affinity_set_init_mask(int gtid, int isa_root)
     }
     else
 # endif
+
+#if KMP_OS_CNK
+    // Under CNK, picking a "full" mask will really restrict the running thread
+    // to the first hardware thread (the first bit in the mask). We don't want
+    // to do that because whatever assignment the OS selected is probably
+    // better (assigning all threads initially to the same hardware thread will
+    // cause deadlocks when using OMP_WAIT_POLICY ACTIVE (i.e. turnaround
+    // mode).
+    return;
+#endif
+  
     __kmp_set_system_affinity(th->th.th_affin_mask, TRUE);
 }
 
