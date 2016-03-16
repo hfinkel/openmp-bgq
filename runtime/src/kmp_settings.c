@@ -3946,7 +3946,7 @@ __kmp_stg_parse_lock_kind( char const * name, char const * value, void * data ) 
     else if ( __kmp_str_match( "bgq-sa", 1, value ) ||
               __kmp_str_match( "bgq_sa", 1, value ) ) {
         __kmp_user_lock_kind = lk_bgq_sa;
-        DYNA_STORE_LOCK_SEQ(bgq_sa);
+        KMP_STORE_LOCK_SEQ(bgq_sa);
     }
 #endif // KMP_OS_CNK
 #if KMP_USE_ADAPTIVE_LOCKS
