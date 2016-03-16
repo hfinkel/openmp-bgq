@@ -2030,6 +2030,34 @@ __kmp_destroy_bgq_sa_lock_with_checks( kmp_bgq_sa_lock_t *lck )
 }
 
 //
+// access functions to fields which don't exist for all lock kinds.
+//
+
+static const ident_t *
+__kmp_get_bgq_sa_lock_location( kmp_bgq_sa_lock_t *lck )
+{
+    return lck->lk.location;
+}
+
+static void
+__kmp_set_bgq_sa_lock_location( kmp_bgq_sa_lock_t *lck, const ident_t *loc )
+{
+    lck->lk.location = loc;
+}
+
+static kmp_lock_flags_t
+__kmp_get_bgq_sa_lock_flags( kmp_bgq_sa_lock_t *lck )
+{
+    return lck->lk.flags;
+}
+
+static void
+__kmp_set_bgq_sa_lock_flags( kmp_bgq_sa_lock_t *lck, kmp_lock_flags_t flags )
+{
+    lck->lk.flags = flags;
+}
+
+//
 // nested BG/Q scalable atomics locks
 //
 

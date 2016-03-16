@@ -391,6 +391,8 @@ struct kmp_base_bgq_sa_lock {
     L2_Lock_t          lock;
     volatile kmp_int32 owner_id;    // (gtid+1) of owning thread, 0 if unlocked
     kmp_int32          depth_locked; // depth locked, for nested locks only
+    ident_t const *    location;       // Source code location of omp_init_lock().
+    kmp_lock_flags_t   flags;          // lock specifics, e.g. critical section lock
 };
 
 typedef struct kmp_base_bgq_sa_lock kmp_base_bgq_sa_lock_t;
