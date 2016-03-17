@@ -1092,13 +1092,20 @@ __kmp_create_monitor( kmp_info_t *th )
     int                 status;
     int                 auto_adj_size = FALSE;
 
+    // Don't create the monitor thread under CNK, it is not needed and it
+    // disturbs the operating system's thread layout scheme.
+#if !KMP_OS_CNK
     if( __kmp_dflt_blocktime == KMP_MAX_BLOCKTIME ) {
         // We don't need monitor thread in case of MAX_BLOCKTIME
         KA_TRACE( 10, ("__kmp_create_monitor: skipping monitor thread because of MAX blocktime\n" ) );
+#endif
         th->th.th_info.ds.ds_tid  = 0; // this makes reap_monitor no-op
         th->th.th_info.ds.ds_gtid = 0;
         return;
+#if !KMP_OS_CNK
     }
+#endif
+
     KA_TRACE( 10, ("__kmp_create_monitor: try to create monitor\n" ) );
 
     KMP_MB();       /* Flush all pending memory write invalidates.  */
