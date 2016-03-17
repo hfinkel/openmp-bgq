@@ -200,7 +200,7 @@ elseif("${libomp_build_type_lowercase}" STREQUAL "minsizerel")
   set(MINSIZEREL_BUILD TRUE)
 endif()
 
-# Include itt notify interface? Right now, always.
+# Include itt notify interface?
 set(LIBOMP_USE_ITT_NOTIFY TRUE CACHE BOOL
   "Use the ITT notify interface")
 
