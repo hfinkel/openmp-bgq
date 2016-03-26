@@ -388,6 +388,11 @@ extern void __kmp_destroy_nested_queuing_lock( kmp_queuing_lock_t *lck );
 // ----------------------------------------------------------------------------
 
 struct kmp_base_bgq_sa_lock {
+    // initialized must be the first entry in the lock data structure!
+    //
+    KMP_ALIGN_CACHE
+    volatile union kmp_bgq_sa_lock * initialized;    // points to the lock union if in initialized state
+
     L2_Lock_t          lock;
     volatile kmp_int32 owner_id;    // (gtid+1) of owning thread, 0 if unlocked
     kmp_int32          depth_locked; // depth locked, for nested locks only
@@ -397,7 +402,7 @@ struct kmp_base_bgq_sa_lock {
 
 typedef struct kmp_base_bgq_sa_lock kmp_base_bgq_sa_lock_t;
 
-union kmp_bgq_sa_lock {
+union KMP_ALIGN_CACHE kmp_bgq_sa_lock {
     kmp_base_bgq_sa_lock_t lk;
     kmp_lock_pool_t pool;   // make certain struct is large enough
     double lk_align;        // use worst case alignment
