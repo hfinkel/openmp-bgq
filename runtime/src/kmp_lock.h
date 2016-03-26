@@ -1234,8 +1234,16 @@ extern void (*(*__kmp_indirect_set))(kmp_user_lock_p, kmp_int32);
 extern int  (*(*__kmp_indirect_unset))(kmp_user_lock_p, kmp_int32);
 extern int  (*(*__kmp_indirect_test))(kmp_user_lock_p, kmp_int32);
 
+#if KMP_ARCH_PPC64_BE
+// FIXME: We cannot have direct dynamic locks on big-Endian systems; what would
+// be the low-order byte of an indirect-lock pointer does not overlap where a
+// 32-bit tag would be stored. Testing the low-order bit of the upper part of
+// the indirect-lock pointer value does not help us.
+#define KMP_EXTRACT_D_TAG(l)   (0)
+#else
 // Extracts direct lock tag from a user lock pointer
 #define KMP_EXTRACT_D_TAG(l)   (*((kmp_dyna_lock_t *)(l)) & ((1<<KMP_LOCK_SHIFT)-1) & -(*((kmp_dyna_lock_t *)(l)) & 1))
+#endif
 
 // Extracts indirect lock index from a user lock pointer
 #define KMP_EXTRACT_I_INDEX(l) (*(kmp_lock_index_t *)(l) >> 1)
