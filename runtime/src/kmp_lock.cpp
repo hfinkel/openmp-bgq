@@ -3814,12 +3814,12 @@ __kmp_get_user_lock_owner(kmp_user_lock_p lck, kmp_uint32 seq)
         case lockseq_nested_queuing:
 #if KMP_USE_ADAPTIVE_LOCKS
         case lockseq_adaptive:
-            return __kmp_get_queuing_lock_owner((kmp_queuing_lock_t *)lck);
 #endif
+            return __kmp_get_queuing_lock_owner((kmp_queuing_lock_t *)lck);
 #if KMP_OS_CNK
         case lockseq_bgq_sa:
         case lockseq_nested_bgq_sa:
-        return __kmp_get_bgq_sa_lock_owner((kmp_bgq_sa_lock_t *)lck);
+            return __kmp_get_bgq_sa_lock_owner((kmp_bgq_sa_lock_t *)lck);
 #endif
         case lockseq_drdpa:
         case lockseq_nested_drdpa:
