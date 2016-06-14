@@ -537,6 +537,7 @@ typedef hwloc_cpuset_t kmp_affin_mask_t;
 # define KMP_CPU_CLR(i,mask)       hwloc_bitmap_clr((hwloc_cpuset_t)mask, (unsigned)i)
 # define KMP_CPU_ZERO(mask)        hwloc_bitmap_zero((hwloc_cpuset_t)mask)
 # define KMP_CPU_COPY(dest, src)   hwloc_bitmap_copy((hwloc_cpuset_t)dest, (hwloc_cpuset_t)src)
+# define KMP_CPU_AND(dest, src)    hwloc_bitmap_and((hwloc_cpuset_t)dest, (hwloc_cpuset_t)dest, (hwloc_cpuset_t)src)
 # define KMP_CPU_COMPLEMENT(max_bit_number, mask) \
     { \
         unsigned i; \
@@ -547,6 +548,8 @@ typedef hwloc_cpuset_t kmp_affin_mask_t;
                 hwloc_bitmap_set((hwloc_cpuset_t)mask, i); \
             } \
         } \
+        hwloc_bitmap_and((hwloc_cpuset_t)mask, (hwloc_cpuset_t)mask, \
+            (hwloc_cpuset_t)__kmp_affin_fullMask); \
     } \
 
 # define KMP_CPU_UNION(dest, src)  hwloc_bitmap_or((hwloc_cpuset_t)dest, (hwloc_cpuset_t)dest, (hwloc_cpuset_t)src)
@@ -656,6 +659,15 @@ typedef unsigned char kmp_affin_mask_t;
             }                                                                \
         }
 
+#  define KMP_CPU_AND(dest, src) \
+        {                                                                    \
+            size_t __i;                                                      \
+            for (__i = 0; __i < __kmp_affin_mask_size; __i++) {              \
+                ((kmp_affin_mask_t *)(dest))[__i]                            \
+                  &= ((kmp_affin_mask_t *)(src))[__i];                       \
+            }                                                                \
+        }
+
 #  define KMP_CPU_COMPLEMENT(max_bit_number, mask) \
         {                                                                    \
             size_t __i;                                                      \
@@ -663,6 +675,7 @@ typedef unsigned char kmp_affin_mask_t;
                 ((kmp_affin_mask_t *)(mask))[__i]                            \
                   = ~((kmp_affin_mask_t *)(mask))[__i];                      \
             }                                                                \
+            KMP_CPU_AND(mask, __kmp_affin_fullMask);                                     \
         }
 
 #  define KMP_CPU_UNION(dest, src) \
@@ -735,6 +748,15 @@ extern int __kmp_num_proc_groups;
             }                                                                \
         }
 
+#   define KMP_CPU_AND(dest, src) \
+        {                                                                    \
+            int __i;                                                         \
+            for (__i = 0; __i < __kmp_num_proc_groups; __i++) {              \
+                ((kmp_affin_mask_t *)(dest))[__i]                            \
+                  &= ((kmp_affin_mask_t *)(src))[__i];                       \
+            }                                                                \
+        }
+
 #   define KMP_CPU_COMPLEMENT(max_bit_number, mask) \
         {                                                                    \
             int __i;                                                         \
@@ -742,6 +764,7 @@ extern int __kmp_num_proc_groups;
                 ((kmp_affin_mask_t *)(mask))[__i]                            \
                   = ~((kmp_affin_mask_t *)(mask))[__i];                      \
             }                                                                \
+            KMP_CPU_AND(mask, __kmp_affin_fullMask);                                     \
         }
 
 #   define KMP_CPU_UNION(dest, src) \
@@ -776,7 +799,8 @@ typedef DWORD kmp_affin_mask_t; /* for compatibility with older winbase.h */
 #   define KMP_CPU_CLR(i,mask)      (*(mask) &= ~(((kmp_affin_mask_t)1) << (i)))
 #   define KMP_CPU_ZERO(mask)       (*(mask) = 0)
 #   define KMP_CPU_COPY(dest, src)  (*(dest) = *(src))
-#   define KMP_CPU_COMPLEMENT(max_bit_number, mask) (*(mask) = ~*(mask))
+#   define KMP_CPU_AND(dest, src)   (*(dest) &= *(src))
+#   define KMP_CPU_COMPLEMENT(max_bit_number, mask) (*(mask) = ~*(mask)); KMP_CPU_AND(mask, __kmp_affin_fullMask)
 #   define KMP_CPU_UNION(dest, src) (*(dest) |= *(src))
 
 #  endif /* KMP_GROUP_AFFINITY */
@@ -881,9 +905,7 @@ extern int __kmp_get_system_affinity(kmp_affin_mask_t *mask, int abort_on_error)
 extern int __kmp_set_system_affinity(kmp_affin_mask_t const *mask, int abort_on_error);
 extern void __kmp_affinity_bind_thread(int which);
 
-# if KMP_OS_LINUX
-extern kmp_affin_mask_t *__kmp_affinity_get_fullMask();
-# endif /* KMP_OS_LINUX */
+extern kmp_affin_mask_t *__kmp_affin_fullMask;
 extern char const * __kmp_cpuinfo_file;
 
 #endif /* KMP_AFFINITY_SUPPORTED */
