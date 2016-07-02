@@ -326,7 +326,7 @@ __kmp_affinity_create_bgq_map(AddrUnsPair **address2os,
 
     if (__kmp_affinity_verbose) {
         char buf[KMP_AFFIN_MASK_PRINT_LEN];
-        __kmp_affinity_print_mask(buf, KMP_AFFIN_MASK_PRINT_LEN, fullMask);
+        __kmp_affinity_print_mask(buf, KMP_AFFIN_MASK_PRINT_LEN, __kmp_affin_fullMask);
 
         if (__kmp_affinity_respect_mask) {
             KMP_INFORM(InitOSProcSetRespect, "KMP_AFFINITY", buf);
@@ -355,7 +355,7 @@ __kmp_affinity_create_bgq_map(AddrUnsPair **address2os,
         //
         // Skip this proc if it is not included in the machine model.
         //
-        if (! KMP_CPU_ISSET(i, fullMask)) {
+        if (! KMP_CPU_ISSET(i, __kmp_affin_fullMask)) {
             continue;
         }
 
@@ -3578,11 +3578,11 @@ __kmp_aux_affinity_initialize(void)
                 // asked for the initial thread's affinity mask, you get back a
                 // mask with only one bit set (the first bit of those available
                 // to the process).
-                if (! KMP_CPU_ISSET((i/__kmp_xproc) * __kmp_xproc, fullMask)) {
+                if (! KMP_CPU_ISSET((i/__kmp_xproc) * __kmp_xproc, __kmp_affin_fullMask)) {
                     continue;
                 }
 
-                KMP_CPU_SET(i, fullMask);
+                KMP_CPU_SET(i, __kmp_affin_fullMask);
             }
 #endif
 
