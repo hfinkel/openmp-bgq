@@ -4655,6 +4655,19 @@ __kmp_aux_get_affinity(void **mask)
 }
 
 int
+__kmp_aux_get_affinity_max_proc() {
+    if (!  KMP_AFFINITY_CAPABLE()) {
+        return 0;
+    }
+#if KMP_GROUP_AFFINITY
+    if ( __kmp_num_proc_groups > 1 ) {
+        return (int)(__kmp_num_proc_groups*sizeof(DWORD_PTR)*CHAR_BIT);
+    }
+#endif
+    return __kmp_xproc;
+}
+
+int
 __kmp_aux_set_affinity_mask_proc(int proc, void **mask)
 {
     int retval;
@@ -4678,11 +4691,7 @@ __kmp_aux_set_affinity_mask_proc(int proc, void **mask)
         }
     }
 
-    if ((proc < 0)
-# if !KMP_USE_HWLOC
-         || ((unsigned)proc >= KMP_CPU_SETSIZE)
-# endif
-       ) {
+    if ((proc < 0) || (proc >= __kmp_aux_get_affinity_max_proc())) {
         return -1;
     }
     if (! KMP_CPU_ISSET(proc, __kmp_affin_fullMask)) {
@@ -4718,11 +4727,7 @@ __kmp_aux_unset_affinity_mask_proc(int proc, void **mask)
         }
     }
 
-    if ((proc < 0)
-# if !KMP_USE_HWLOC
-         || ((unsigned)proc >= KMP_CPU_SETSIZE)
-# endif
-       ) {
+    if ((proc < 0) || (proc >= __kmp_aux_get_affinity_max_proc())) {
         return -1;
     }
     if (! KMP_CPU_ISSET(proc, __kmp_affin_fullMask)) {
@@ -4758,11 +4763,7 @@ __kmp_aux_get_affinity_mask_proc(int proc, void **mask)
         }
     }
 
-    if ((proc < 0)
-# if !KMP_USE_HWLOC
-         || ((unsigned)proc >= KMP_CPU_SETSIZE)
-# endif
-       ) {
+    if ((proc < 0) || (proc >= __kmp_aux_get_affinity_max_proc())) {
         return -1;
     }
     if (! KMP_CPU_ISSET(proc, __kmp_affin_fullMask)) {
