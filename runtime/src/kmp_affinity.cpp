@@ -338,7 +338,7 @@ __kmp_affinity_create_bgq_map(AddrUnsPair **address2os,
       __kmp_allocate(sizeof(**address2os) * __kmp_avail_proc);
     int avail_ct = 0;
     unsigned int i;
-    for (i = 0; i < KMP_CPU_SETSIZE; ++i) {
+    KMP_CPU_SET_ITERATE(i, __kmp_affin_fullMask) {
         //
         // Skip this proc if it is not included in the machine model.
         //
@@ -3732,7 +3732,7 @@ __kmp_aux_affinity_initialize(void)
             unsigned i;
 
 #if KMP_OS_CNK
-            for (i = 0; i < KMP_CPU_SETSIZE; ++i) {
+            KMP_CPU_SET_ITERATE(i, __kmp_affin_fullMask) {
                 // Under CNK, threads don't really have affinity masks, but
                 // rather, are assigned to a single thread. As a result, when
                 // asked for the initial thread's affinity mask, you get back a
