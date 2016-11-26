@@ -143,7 +143,7 @@ __kmp_affinity_determine_capable(const char *env_var)
 #if KMP_OS_CNK
   // The BG/Q has 16 cores, 4 hardware threads per core, so we need a 64-bit
   // mask (8 bytes).
-  __kmp_affin_mask_size = 8;
+  KMP_AFFINITY_ENABLE(8);
   return;
 #endif
 
