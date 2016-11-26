@@ -3732,7 +3732,7 @@ __kmp_aux_affinity_initialize(void)
             unsigned i;
 
 #if KMP_OS_CNK
-            for (i = 0; i < __kmp_affin_mask_size*BITS_PER_MASK_T; ++i) {
+            for (i = 0; i < __kmp_affin_mask_size*CHAR_BIT; ++i) {
                 // Under CNK, threads don't really have affinity masks, but
                 // rather, are assigned to a single thread. As a result, when
                 // asked for the initial thread's affinity mask, you get back a
