@@ -2870,7 +2870,7 @@ __kmp_acquire_drdpa_lock_timed_template( kmp_drdpa_lock_t *lck, kmp_int32 gtid )
     // polling area has been reconfigured.  Unless it is reconfigured, the
     // reloads stay in L1 cache and are cheap.
     //
-    // Keep this code in sync with KMP_WAIT_YIELD, in kmp_dispatch.c !!!
+    // Keep this code in sync with KMP_WAIT_YIELD, in kmp_dispatch.cpp !!!
     //
     // The current implementation of KMP_WAIT_YIELD doesn't allow for mask
     // and poll to be re-read every spin iteration.
@@ -3868,7 +3868,7 @@ kmp_dyna_lockseq_t __kmp_user_lock_seq = lockseq_bgq_sa;
 kmp_dyna_lockseq_t __kmp_user_lock_seq = lockseq_queuing;
 #endif
 
-// This is used only in kmp_error.c when consistency checking is on.
+// This is used only in kmp_error.cpp when consistency checking is on.
 kmp_int32
 __kmp_get_user_lock_owner(kmp_user_lock_p lck, kmp_uint32 seq)
 {
