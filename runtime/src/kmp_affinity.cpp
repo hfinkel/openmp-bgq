@@ -4436,8 +4436,7 @@ __kmp_affinity_set_init_mask(int gtid, int isa_root)
         char buf[KMP_AFFIN_MASK_PRINT_LEN];
         __kmp_affinity_print_mask(buf, KMP_AFFIN_MASK_PRINT_LEN,
           th->th.th_affin_mask);
-        KMP_INFORM(BoundToOSProcSet, "KMP_AFFINITY", (kmp_int32)getpid(), gtid,
-          buf);
+        KMP_INFORM(BoundToOSProcSet, "KMP_AFFINITY", (kmp_int32)getpid(),__kmp_gettid(), gtid, buf);
     }
 
 # if KMP_OS_WINDOWS
@@ -4510,8 +4509,7 @@ __kmp_affinity_set_place(int gtid)
         char buf[KMP_AFFIN_MASK_PRINT_LEN];
         __kmp_affinity_print_mask(buf, KMP_AFFIN_MASK_PRINT_LEN,
           th->th.th_affin_mask);
-        KMP_INFORM(BoundToOSProcSet, "OMP_PROC_BIND", (kmp_int32)getpid(),
-          gtid, buf);
+        KMP_INFORM(BoundToOSProcSet, "OMP_PROC_BIND", (kmp_int32)getpid(), __kmp_gettid(), gtid, buf);
     }
     __kmp_set_system_affinity(th->th.th_affin_mask, TRUE);
 }
@@ -4829,7 +4827,7 @@ void __kmp_balanced_affinity( int tid, int nthreads )
             char buf[KMP_AFFIN_MASK_PRINT_LEN];
             __kmp_affinity_print_mask(buf, KMP_AFFIN_MASK_PRINT_LEN, mask);
             KMP_INFORM(BoundToOSProcSet, "KMP_AFFINITY", (kmp_int32)getpid(),
-              tid, buf);
+            __kmp_gettid(), tid, buf);
         }
         __kmp_set_system_affinity( mask, TRUE );
         KMP_CPU_FREE_FROM_STACK(mask);
@@ -4990,7 +4988,7 @@ void __kmp_balanced_affinity( int tid, int nthreads )
             char buf[KMP_AFFIN_MASK_PRINT_LEN];
             __kmp_affinity_print_mask(buf, KMP_AFFIN_MASK_PRINT_LEN, mask);
             KMP_INFORM(BoundToOSProcSet, "KMP_AFFINITY", (kmp_int32)getpid(),
-              tid, buf);
+            __kmp_gettid(), tid, buf);
         }
         __kmp_set_system_affinity( mask, TRUE );
         KMP_CPU_FREE_FROM_STACK(mask);
