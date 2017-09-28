@@ -27,7 +27,19 @@
 // Header file global to this project
 #include "omptarget.h"
 
-#define DP(...) DEBUGP("Libomptarget", __VA_ARGS__)
+#ifdef OMPTARGET_DEBUG
+static int DebugLevel = 0;
+
+#define DP(...) \
+  do { \
+    if (DebugLevel > 0) { \
+      DEBUGP("Libomptarget", __VA_ARGS__); \
+    } \
+  } while (false)
+#else // OMPTARGET_DEBUG
+#define DP(...) {}
+#endif // OMPTARGET_DEBUG
+
 #define INF_REF_CNT (LONG_MAX>>1) // leave room for additions/subtractions
 #define CONSIDERED_INF(x) (x > (INF_REF_CNT>>1))
 
@@ -281,6 +293,12 @@ public:
 };
 
 void RTLsTy::LoadRTLs() {
+#ifdef OMPTARGET_DEBUG
+  if (char *envStr = getenv("LIBOMPTARGET_DEBUG")) {
+    DebugLevel = std::stoi(envStr);
+  }
+#endif // OMPTARGET_DEBUG
+
   // Parse environment variable OMP_TARGET_OFFLOAD (if set)
   char *envStr = getenv("OMP_TARGET_OFFLOAD");
   if (envStr && !strcmp(envStr, "DISABLED")) {
@@ -314,34 +332,34 @@ void RTLsTy::LoadRTLs() {
     R.RTLName = Name;
 #endif
 
-    if (!(R.is_valid_binary = (RTLInfoTy::is_valid_binary_ty *)dlsym(
+    if (!(*((void**) &R.is_valid_binary) = dlsym(
               dynlib_handle, "__tgt_rtl_is_valid_binary")))
       continue;
-    if (!(R.number_of_devices = (RTLInfoTy::number_of_devices_ty *)dlsym(
+    if (!(*((void**) &R.number_of_devices) = dlsym(
               dynlib_handle, "__tgt_rtl_number_of_devices")))
       continue;
-    if (!(R.init_device = (RTLInfoTy::init_device_ty *)dlsym(
+    if (!(*((void**) &R.init_device) = dlsym(
               dynlib_handle, "__tgt_rtl_init_device")))
       continue;
-    if (!(R.load_binary = (RTLInfoTy::load_binary_ty *)dlsym(
+    if (!(*((void**) &R.load_binary) = dlsym(
               dynlib_handle, "__tgt_rtl_load_binary")))
       continue;
-    if (!(R.data_alloc = (RTLInfoTy::data_alloc_ty *)dlsym(
+    if (!(*((void**) &R.data_alloc) = dlsym(
               dynlib_handle, "__tgt_rtl_data_alloc")))
       continue;
-    if (!(R.data_submit = (RTLInfoTy::data_submit_ty *)dlsym(
+    if (!(*((void**) &R.data_submit) = dlsym(
               dynlib_handle, "__tgt_rtl_data_submit")))
       continue;
-    if (!(R.data_retrieve = (RTLInfoTy::data_retrieve_ty *)dlsym(
+    if (!(*((void**) &R.data_retrieve) = dlsym(
               dynlib_handle, "__tgt_rtl_data_retrieve")))
       continue;
-    if (!(R.data_delete = (RTLInfoTy::data_delete_ty *)dlsym(
+    if (!(*((void**) &R.data_delete) = dlsym(
               dynlib_handle, "__tgt_rtl_data_delete")))
       continue;
-    if (!(R.run_region = (RTLInfoTy::run_region_ty *)dlsym(
+    if (!(*((void**) &R.run_region) = dlsym(
               dynlib_handle, "__tgt_rtl_run_target_region")))
       continue;
-    if (!(R.run_team_region = (RTLInfoTy::run_team_region_ty *)dlsym(
+    if (!(*((void**) &R.run_team_region) = dlsym(
               dynlib_handle, "__tgt_rtl_run_target_team_region")))
       continue;
 
@@ -2144,12 +2162,14 @@ static int target(int32_t device_id, void *host_ptr, int32_t arg_num,
       } else {
         fpArrays.push_back(TgtPtrBegin);
         TgtBaseOffset = (intptr_t)HstPtrBase - (intptr_t)HstPtrBegin;
+#ifdef OMPTARGET_DEBUG
         void *TgtPtrBase = (void *)((intptr_t)TgtPtrBegin + TgtBaseOffset);
         DP("Allocated %" PRId64 " bytes of target memory at " DPxMOD " for "
             "%sprivate array " DPxMOD " - pushing target argument " DPxMOD "\n",
             arg_sizes[i], DPxPTR(TgtPtrBegin),
             (arg_types[i] & OMP_TGT_MAPTYPE_TO ? "first-" : ""),
             DPxPTR(HstPtrBegin), DPxPTR(TgtPtrBase));
+#endif
         // If first-private, copy data from host
         if (arg_types[i] & OMP_TGT_MAPTYPE_TO) {
           int rt = Device.data_submit(TgtPtrBegin, HstPtrBegin, arg_sizes[i]);
@@ -2171,9 +2191,11 @@ static int target(int32_t device_id, void *host_ptr, int32_t arg_num,
       TgtPtrBegin = Device.getTgtPtrBegin(HstPtrBegin, arg_sizes[i], IsLast,
           false);
       TgtBaseOffset = (intptr_t)HstPtrBase - (intptr_t)HstPtrBegin;
+#ifdef OMPTARGET_DEBUG
       void *TgtPtrBase = (void *)((intptr_t)TgtPtrBegin + TgtBaseOffset);
       DP("Obtained target argument " DPxMOD " from host pointer " DPxMOD "\n",
           DPxPTR(TgtPtrBase), DPxPTR(HstPtrBegin));
+#endif
     }
     tgt_args.push_back(TgtPtrBegin);
     tgt_offsets.push_back(TgtBaseOffset);

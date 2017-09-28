@@ -588,7 +588,7 @@ void __kmpc_flush(ident_t *loc) {
   // mfence is a SSE2 instruction. Do not execute it if CPU is not SSE2.
   if (!__kmp_cpuinfo.initialized) {
     __kmp_query_cpuid(&__kmp_cpuinfo);
-  }; // if
+  }
   if (!__kmp_cpuinfo.sse2) {
     // CPU cannot execute SSE2 instructions.
   } else {
@@ -599,7 +599,7 @@ void __kmpc_flush(ident_t *loc) {
 #else
     __sync_synchronize();
 #endif // KMP_COMPILER_ICC
-  }; // if
+  }
 #endif // KMP_MIC
 #elif (KMP_ARCH_ARM || KMP_ARCH_AARCH64 || KMP_ARCH_MIPS || KMP_ARCH_MIPS64)
 // Nothing to see here move along
@@ -639,7 +639,7 @@ void __kmpc_barrier(ident_t *loc, kmp_int32 global_tid) {
   if (__kmp_env_consistency_check) {
     if (loc == 0) {
       KMP_WARNING(ConstructIdentInvalid); // ??? What does it mean for the user?
-    }; // if
+    }
 
     __kmp_check_barrier(global_tid, ct_barrier, loc);
   }
@@ -869,7 +869,7 @@ __kmp_init_indirect_csptr(kmp_critical_name *crit, ident_t const *loc,
 #if USE_ITT_BUILD
   __kmp_itt_critical_creating(ilk->lock, loc);
 #endif
-  int status = KMP_COMPARE_AND_STORE_PTR(lck, 0, ilk);
+  int status = KMP_COMPARE_AND_STORE_PTR(lck, nullptr, ilk);
   if (status == 0) {
 #if USE_ITT_BUILD
     __kmp_itt_critical_destroyed(ilk->lock);
@@ -2985,7 +2985,7 @@ kmp_uint64 __kmpc_get_taskid() {
   gtid = __kmp_get_gtid();
   if (gtid < 0) {
     return 0;
-  }; // if
+  }
   thread = __kmp_thread_from_gtid(gtid);
   return thread->th.th_current_task->td_task_id;
 
@@ -3000,7 +3000,7 @@ kmp_uint64 __kmpc_get_parent_taskid() {
   gtid = __kmp_get_gtid();
   if (gtid < 0) {
     return 0;
-  }; // if
+  }
   thread = __kmp_thread_from_gtid(gtid);
   parent_task = thread->th.th_current_task->td_parent;
   return (parent_task == NULL ? 0 : parent_task->td_task_id);
@@ -3101,8 +3101,8 @@ void __kmpc_doacross_init(ident_t *loc, int gtid, int num_dims,
   // __kmp_dispatch_num_buffers)
   if (idx != sh_buf->doacross_buf_idx) {
     // Shared buffer is occupied, wait for it to be free
-    __kmp_wait_yield_4((kmp_uint32 *)&sh_buf->doacross_buf_idx, idx, __kmp_eq_4,
-                       NULL);
+    __kmp_wait_yield_4((volatile kmp_uint32 *)&sh_buf->doacross_buf_idx, idx,
+                       __kmp_eq_4, NULL);
   }
   // Check if we are the first thread. After the CAS the first thread gets 0,
   // others get 1 if initialization is in progress, allocated pointer otherwise.
@@ -3267,8 +3267,7 @@ void __kmpc_doacross_post(ident_t *loc, int gtid, long long *vec) {
   iter_number >>= 5; // divided by 32
   flag = 1 << shft;
   if ((flag & pr_buf->th_doacross_flags[iter_number]) == 0)
-    KMP_TEST_THEN_OR32((kmp_int32 *)&pr_buf->th_doacross_flags[iter_number],
-                       (kmp_int32)flag);
+    KMP_TEST_THEN_OR32(&pr_buf->th_doacross_flags[iter_number], flag);
   KA_TRACE(20, ("__kmpc_doacross_post() exit: T#%d iter %lld posted\n", gtid,
                 (iter_number << 5) + shft));
 }
@@ -3294,7 +3293,7 @@ void __kmpc_doacross_fini(ident_t *loc, int gtid) {
                      (kmp_int64)&sh_buf->doacross_num_done);
     KMP_DEBUG_ASSERT(num_done == (kmp_int64)sh_buf->doacross_num_done);
     KMP_DEBUG_ASSERT(idx == sh_buf->doacross_buf_idx);
-    __kmp_thread_free(th, (void *)sh_buf->doacross_flags);
+    __kmp_thread_free(th, CCAST(kmp_uint32 *, sh_buf->doacross_flags));
     sh_buf->doacross_flags = NULL;
     sh_buf->doacross_num_done = 0;
     sh_buf->doacross_buf_idx +=
